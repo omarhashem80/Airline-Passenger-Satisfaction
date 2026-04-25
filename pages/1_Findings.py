@@ -6,10 +6,6 @@ import streamlit as st
 
 st.set_page_config(page_title="Findings", page_icon="📊", layout="wide")
 
-
-# =========================
-# 📥 LOAD DATA
-# =========================
 @st.cache_data
 def load_data(path: str) -> pd.DataFrame:
     return pd.read_csv(path)
@@ -18,9 +14,6 @@ def load_data(path: str) -> pd.DataFrame:
 train_df = load_data("data/train.csv")
 
 
-# =========================
-# 🧮 HELPER FUNCTIONS
-# =========================
 def create_histogram_with_boxplot(df: pd.DataFrame, x: str):
     fig = make_subplots(rows=2, cols=1)
     fig.add_trace(go.Histogram(x=df[x], name='Histogram'), row=1, col=1)
@@ -87,9 +80,6 @@ def categorical_distribution(df: pd.DataFrame, col: str) -> pd.DataFrame:
     )
 
 
-# =========================
-# 📊 HEADER
-# =========================
 st.title("📊 Findings")
 st.caption("Interactive EDA dashboard based on notebook analysis")
 
@@ -107,15 +97,8 @@ with k3:
 st.divider()
 
 
-# =========================
-# 📑 TABS
-# =========================
 tab1, tab2, tab3 = st.tabs(["📊 Univariate", "🔗 Bivariate", "🧠 Summary"])
 
-
-# =========================
-# 📊 UNIVARIATE
-# =========================
 with tab1:
     st.subheader("Univariate Analysis")
 
@@ -127,7 +110,6 @@ with tab1:
                 "On-board service", "Leg room service", "Baggage handling", "Checkin service", 
                 "Inflight service", "Cleanliness", "satisfaction"]
 
-    # 📊 Numerical
     st.markdown("### Numerical Features")
     selected_num = st.selectbox(
         "Select a numerical feature",
@@ -136,7 +118,6 @@ with tab1:
     )
     create_histogram_with_boxplot(train_df, selected_num)
 
-    # 🎯 Categorical
     st.markdown("### Categorical Features")
     selected_cat = st.selectbox(
         "Select a categorical feature",
@@ -146,15 +127,9 @@ with tab1:
     create_pie_chart(train_df, selected_cat)
 
 
-# =========================
-# 🔗 BIVARIATE
-# =========================
 with tab2:
     st.subheader("Bivariate Analysis")
 
-    # =========================
-    # 🎯 Categorical vs Target
-    # =========================
     st.markdown("### Categorical vs Satisfaction")
 
     travel_rate = satisfaction_rate(train_df, "Type of Travel")
@@ -183,9 +158,6 @@ with tab2:
     fig_class.update_layout(showlegend=False, yaxis_title="Satisfaction Rate (%)")
     st.plotly_chart(fig_class, width="stretch")
 
-    # =========================
-    # 📊 Numerical vs Numerical
-    # =========================
     st.markdown("### Numerical vs Numerical")
 
     num_cols = [
@@ -213,9 +185,6 @@ with tab2:
     )
     st.plotly_chart(fig_delay, width="stretch")
 
-    # =========================
-    # 📊 Categorical vs Categorical
-    # =========================
     st.markdown("### Feature vs Satisfaction Distribution")
 
     commentary_map = {
@@ -250,9 +219,6 @@ with tab2:
         st.write(commentary_map[selected_feature])
 
 
-# =========================
-# 🧠 SUMMARY
-# =========================
 with tab3:
     st.subheader("EDA Summary")
 
