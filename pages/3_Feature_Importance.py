@@ -2,7 +2,9 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-st.set_page_config(page_title="Feature Importance", page_icon="📌", layout="wide")
+st.set_page_config(
+    page_title="Feature Importance", page_icon="📌", layout="wide"
+)
 
 
 @st.cache_data
@@ -10,8 +12,10 @@ def load_feature_importance(path: str) -> pd.DataFrame:
     return pd.read_csv(path)
 
 
-st.title("📌 Feature Importance Dashboard")
-st.caption("Model interpretability across RF, AdaBoost, and Logistic Regression")
+st.title("Feature Importance Dashboard")
+st.caption(
+    "Model interpretability across RF, AdaBoost, and Logistic Regression"
+)
 
 df = load_feature_importance("tmp/feature_importance.csv")
 
@@ -35,7 +39,7 @@ norm_df["std"] = norm_df[["RF", "AdaBoost", "LR"]].std(axis=1)
 norm_df = norm_df.sort_values("avg", ascending=False)
 
 
-tab1, tab2, tab3 = st.tabs(["📊 Overview", "⚖️ Model Comparison", "🧠 Insights"])
+tab1, tab2, tab3 = st.tabs(["Overview", " Model Comparison", "🧠 Insights"])
 
 
 with tab1:
@@ -50,7 +54,7 @@ with tab1:
         y="feature",
         orientation="h",
         text_auto=".2f",
-        title="Top Features (Average Importance Across Models)"
+        title="Top Features (Average Importance Across Models)",
     )
 
     fig.update_layout(yaxis=dict(autorange="reversed"))
@@ -63,7 +67,7 @@ with tab2:
     selected_features = st.multiselect(
         "Select Features",
         options=norm_df["feature"].tolist(),
-        default=norm_df.head(8)["feature"].tolist()
+        default=norm_df.head(8)["feature"].tolist(),
     )
 
     if not selected_features:
@@ -76,7 +80,7 @@ with tab2:
         id_vars="feature",
         value_vars=["RF", "AdaBoost", "LR"],
         var_name="Model",
-        value_name="Importance"
+        value_name="Importance",
     )
 
     fig = px.bar(
@@ -86,7 +90,7 @@ with tab2:
         color="Model",
         barmode="group",
         text_auto=".2f",
-        title="Feature Importance by Model"
+        title="Feature Importance by Model",
     )
 
     fig.update_layout(xaxis_tickangle=45)
@@ -111,33 +115,39 @@ with tab3:
     disagreement = norm_df.nlargest(5, "std")["feature"].tolist()
 
     dominant = norm_df[
-        (norm_df[["RF", "AdaBoost", "LR"]].max(axis=1) > 0.25) &
-        (norm_df["std"] > 0.05)
+        (norm_df[["RF", "AdaBoost", "LR"]].max(axis=1) > 0.25)
+        & (norm_df["std"] > 0.05)
     ]["feature"].tolist()
 
     st.markdown("### 🔍 Key Findings")
 
-    st.markdown(f"""
+    st.markdown(
+        f"""
 - 🔝 **Top drivers overall**: {', '.join(top5) if top5 else 'N/A'}
 - 🌳 **Random Forest focuses on**: **{top_rf}**
 - ⚡ **AdaBoost focuses on**: **{top_ab}**
 - 📈 **Logistic Regression focuses on**: **{top_lr}**
-    """)
+    """
+    )
 
     st.markdown("### 🤝 Model Agreement")
     st.success(", ".join(consistent) if consistent else "No clear agreement")
 
     st.markdown("### ⚠️ Model Disagreement")
-    st.warning(", ".join(disagreement) if disagreement else "No strong disagreement")
+    st.warning(
+        ", ".join(disagreement) if disagreement else "No strong disagreement"
+    )
 
     if dominant:
         st.markdown("### 🔥 Model-Sensitive Features")
         st.error(", ".join(dominant))
 
-    st.markdown("""
+    st.markdown(
+        """
 ### 💡 Interpretation
 
-- Tree-based models (RF, AdaBoost) capture nonlinear interactions.
+- Tree-based models (RF, AdaBoost) capture nonlinear relationships.
 - Logistic Regression emphasizes linear structural effects.
 - Consistently high features → strong business drivers.
-""")
+"""
+    )

@@ -23,12 +23,16 @@ with left:
     st.markdown(
         """
 ### Project Story
-This app publishes key findings from the ML project and provides a prediction workspace
+This app publishes key findings from the ML project and provides a prediction
+workspace
 for testing passenger profiles. Use the pages in the left sidebar to explore:
 
-- **Findings**: full EDA walkthrough with interpreted insights from the notebook
-- **Model Predict**: input passenger details and estimate satisfaction probability
-- **Feature Importance**: model-side ranking of drivers across RF, AdaBoost, and LR
+- **Findings**: full EDA walkthrough with interpreted insights from the
+notebook
+- **Model Predict**: input passenger details and estimate satisfaction
+probability
+- **Feature Importance**: model-side ranking of drivers across RF, AdaBoost,
+and LR
 - **Conclusion**: final takeaways and action plan
         """
     )
@@ -45,5 +49,6 @@ st.subheader("Quick Dataset Snapshot")
 st.dataframe(train_df.head(10), width="stretch")
 
 st.info(
-    "Use the sidebar to switch pages and dive deeper into the analysis, model predictions, and feature importance insights"
+    "Use the sidebar to switch pages and dive deeper into the analysis, "
+    "model predictions, and feature importance insights"
 )
