@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.set_page_config(page_title="Conclusion", page_icon="✅", layout="wide")
+st.set_page_config(page_title="Conclusion", page_icon="", layout="wide")
 
 st.title("✅ Final Conclusion")
 st.caption("Business-driven insights derived from EDA and model interpretation")

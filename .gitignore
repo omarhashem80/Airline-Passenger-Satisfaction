@@ -17,23 +17,6 @@ build/
 *.swp
 *.swo
 
-# Jupyter Notebook
-.ipynb_checkpoints/
-*.ipynb
-
-# # Data files
-# # *.csv
-# *.xlsx
-# *.json
-# data/
-# datasets/
-
-# Models
-# *.pkl
-# *.h5
-# *.pt
-# *.pth
-# models/
 
 # OS
 .DS_Store
