@@ -1,21 +1,69 @@
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import streamlit as st
 
 st.set_page_config(page_title="Findings", page_icon="📊", layout="wide")
 
+
+# =========================
+# 📥 LOAD DATA
+# =========================
 @st.cache_data
 def load_data(path: str) -> pd.DataFrame:
     return pd.read_csv(path)
 
 
+train_df = load_data("data/train.csv")
+
+
+# =========================
+# 🧮 HELPER FUNCTIONS
+# =========================
+def create_histogram_with_boxplot(df: pd.DataFrame, x: str):
+    fig = make_subplots(rows=2, cols=1)
+    fig.add_trace(go.Histogram(x=df[x], name='Histogram'), row=1, col=1)
+    fig.add_trace(go.Box(x=df[x], name="Box"), row=2, col=1)
+    fig.update_layout(
+        title=f'Distribution of {x}',
+        height=600,
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+
+def create_pie_chart(df: pd.DataFrame, cat: str):
+    fig = px.pie(names=df[cat], hole=0.3, title=f"Distribution of {cat}")
+    fig.update_traces(textinfo='percent+label')
+    fig.update_layout(height=800)
+    st.plotly_chart(fig, use_container_width=True)
+
+
+def create_bar_chart(df: pd.DataFrame, cat: str, target: str):
+    dff = df.groupby(cat)[target].value_counts(normalize=True).unstack().reset_index()
+    dff = dff.melt(id_vars=cat, var_name=target, value_name='proportion')
+    dff["proportion_pct"] = dff["proportion"] * 100
+    fig = px.bar(
+        dff,
+        x=cat,
+        y='proportion_pct',
+        color=target,
+        barmode='group',
+        text_auto='.2f',
+        title=f'Distribution of {target} by {cat}',
+        labels={cat: cat.capitalize(), 'proportion_pct': 'Proportion (%)', target: target.capitalize()}
+    )
+    fig.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
+    st.plotly_chart(fig, use_container_width=True)
+
+
 def satisfaction_rate(df: pd.DataFrame, group_col: str) -> pd.DataFrame:
-    grouped = (
+    return (
         df.groupby(group_col)["satisfaction"]
         .apply(lambda x: (x == "satisfied").mean() * 100)
         .reset_index(name="satisfaction_rate")
+        .sort_values("satisfaction_rate", ascending=False)
     )
-    return grouped.sort_values("satisfaction_rate", ascending=False)
 
 
 def two_class_distribution(df: pd.DataFrame, by_col: str) -> pd.DataFrame:
@@ -29,9 +77,19 @@ def two_class_distribution(df: pd.DataFrame, by_col: str) -> pd.DataFrame:
     return dff
 
 
-train_df = load_data("data/train.csv")
+def categorical_distribution(df: pd.DataFrame, col: str) -> pd.DataFrame:
+    return (
+        df[col]
+        .value_counts(normalize=True)
+        .mul(100)
+        .reset_index(name="percentage")
+        .rename(columns={"index": col})
+    )
 
 
+# =========================
+# 📊 HEADER
+# =========================
 st.title("📊 Findings")
 st.caption("Interactive EDA dashboard based on notebook analysis")
 
@@ -48,10 +106,56 @@ with k3:
 
 st.divider()
 
+
+# =========================
+# 📑 TABS
+# =========================
 tab1, tab2, tab3 = st.tabs(["📊 Univariate", "🔗 Bivariate", "🧠 Summary"])
 
+
+# =========================
+# 📊 UNIVARIATE
+# =========================
 with tab1:
     st.subheader("Univariate Analysis")
+
+    # Define all columns
+    num_cols = ["Age", "Flight Distance", "Departure Delay in Minutes", "Arrival Delay in Minutes"]
+    cat_cols = ["Gender", "Customer Type", "Type of Travel", "Class", "Inflight wifi service", 
+                "Departure/Arrival time convenient", "Ease of Online booking", "Gate location", 
+                "Food and drink", "Online boarding", "Seat comfort", "Inflight entertainment", 
+                "On-board service", "Leg room service", "Baggage handling", "Checkin service", 
+                "Inflight service", "Cleanliness", "satisfaction"]
+
+    # 📊 Numerical
+    st.markdown("### Numerical Features")
+    selected_num = st.selectbox(
+        "Select a numerical feature",
+        num_cols,
+        key="num_select"
+    )
+    create_histogram_with_boxplot(train_df, selected_num)
+
+    # 🎯 Categorical
+    st.markdown("### Categorical Features")
+    selected_cat = st.selectbox(
+        "Select a categorical feature",
+        cat_cols,
+        key="cat_select"
+    )
+    create_pie_chart(train_df, selected_cat)
+
+
+# =========================
+# 🔗 BIVARIATE
+# =========================
+with tab2:
+    st.subheader("Bivariate Analysis")
+
+    # =========================
+    # 🎯 Categorical vs Target
+    # =========================
+    st.markdown("### Categorical vs Satisfaction")
 
     travel_rate = satisfaction_rate(train_df, "Type of Travel")
     fig_travel = px.bar(
@@ -64,12 +168,7 @@ with tab1:
     )
     fig_travel.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
     fig_travel.update_layout(showlegend=False, yaxis_title="Satisfaction Rate (%)")
-
     st.plotly_chart(fig_travel, width="stretch")
-    with st.expander("📌 Insight"):
-        st.write(
-            "Business travelers are significantly more satisfied, while personal travelers show strong dissatisfaction trends."
-        )
 
     class_rate = satisfaction_rate(train_df, "Class")
     fig_class = px.bar(
@@ -82,26 +181,11 @@ with tab1:
     )
     fig_class.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
     fig_class.update_layout(showlegend=False, yaxis_title="Satisfaction Rate (%)")
-
     st.plotly_chart(fig_class, width="stretch")
-    with st.expander("📌 Insight"):
-        st.write(
-            "Business class dominates satisfaction, while economy classes consistently underperform."
-        )
 
-    fig_age_dist = px.histogram(
-        train_df,
-        x="Age",
-        nbins=30,
-        title="Age Distribution",
-    )
-    st.plotly_chart(fig_age_dist, width="stretch")
-
-
-
-with tab2:
-    st.subheader("Bivariate Analysis Highlights")
-
+    # =========================
+    # 📊 Numerical vs Numerical
+    # =========================
     st.markdown("### Numerical vs Numerical")
 
     num_cols = [
@@ -111,7 +195,8 @@ with tab2:
         "Arrival Delay in Minutes",
     ]
 
-    corr = train_df[num_cols].corr(numeric_only=True, method="spearman")
+    corr = train_df[num_cols].corr(method="spearman")
+
     fig_corr = px.imshow(
         corr,
         text_auto=".2f",
@@ -119,82 +204,65 @@ with tab2:
     )
     st.plotly_chart(fig_corr, width="stretch")
 
-    fig_delay_scatter = px.scatter(
+    fig_delay = px.scatter(
         train_df,
         x="Departure Delay in Minutes",
         y="Arrival Delay in Minutes",
-        title="Departure Delay vs Arrival Delay",
-        opacity=0.45,
+        opacity=0.4,
+        title="Departure vs Arrival Delay",
     )
-    st.plotly_chart(fig_delay_scatter, width="stretch")
+    st.plotly_chart(fig_delay, width="stretch")
 
-    st.markdown("### Categorical vs Numerical")
-
-    age_by_sat = train_df.groupby("satisfaction", as_index=False)["Age"].mean()
-    fig_age = px.bar(
-        age_by_sat,
-        x="satisfaction",
-        y="Age",
-        color="satisfaction",
-        text_auto=".2f",
-        title="Mean Age by Satisfaction",
-    )
-    fig_age.update_layout(showlegend=False)
-
-    st.plotly_chart(fig_age, width="stretch")
-    with st.expander("📌 Insight"):
-        st.write(
-            "Older passengers tend to report higher satisfaction, while younger passengers are more critical."
-        )
-
-    st.markdown("### Categorical vs Categorical")
+    # =========================
+    # 📊 Categorical vs Categorical
+    # =========================
+    st.markdown("### Feature vs Satisfaction Distribution")
 
     commentary_map = {
-        "Gender": "Low predictive power: satisfaction is nearly identical across genders.",
-        "Customer Type": "Disloyal customers are far more dissatisfied than loyal ones.",
-        "Type of Travel": "Personal travelers show extreme dissatisfaction (~90%).",
-        "Class": "Business class drives satisfaction; economy segments fail expectations.",
-        "Inflight wifi service": "Poor wifi is worse than no wifi.",
-        "Online boarding": "One of the strongest drivers of satisfaction.",
-        "Seat comfort": "Critical factor — low comfort leads to high dissatisfaction.",
-        "Cleanliness": "Clear linear relationship with satisfaction.",
+        "Gender": "Low impact on satisfaction.",
+        "Customer Type": "Disloyal customers are much more dissatisfied.",
+        "Type of Travel": "A massive 90% of personal travelers are dissatisfied, making this one of the strongest negative predictors.",
+        "Class": "Business class is the only category where a majority of passengers are satisfied (69%).",
+        "Inflight wifi service": "Satisfaction spikes to nearly 99% when wifi is rated 5, while ratings below 4 result in at least 67% dissatisfaction.",
+        "Departure/Arrival time convenient": "Satisfaction remains relatively stable across all ratings, suggesting that schedule convenience is not a primary driver of overall passenger sentiment.",
+        "Ease of Online booking": "Satisfaction jumps significantly once booking ease reaches a 4 or 5 rating, while low scores (1-3) correlate with roughly 70% dissatisfaction.",
+        "Gate location": "Gate location shows a weak relationship with satisfaction, as dissatisfaction peaks at mid-range ratings.",
+        "Food and drink": "Satisfaction only becomes the majority outcome when food and drink are rated 4 or 5. A rating of 1 leads to 80% dissatisfaction.",
+        "Online boarding": "Satisfaction sky-rockets from roughly 13% to over 87% once the online boarding score hits 5, making this a critical tipping point feature.",
+        "Seat comfort": "Satisfaction flips to a majority only at ratings of 4 or 5, proving that good seat comfort is a prerequisite for a positive experience.",
+        "Inflight entertainment": "Satisfaction jumps from 27% to over 61% when entertainment moves from a 3 to a 4, marking it as a high-impact delighter feature.",
+        "On-board service": "Satisfaction only breaks the 50% threshold when on-board service reaches a rating of 4 or 5, highlighting it as a crucial driver of positive sentiment.",
+        "Leg room service": "Satisfaction becomes the majority only when leg room is rated 4 or 5, highlighting it as a significant physical comfort driver.",
+        "Baggage handling": "Satisfaction only becomes the majority at a top rating of 5, indicating that passengers view good baggage handling as a basic expectation.",
+        "Checkin service": "Satisfaction only hits a clear majority when check-in service is rated a perfect 5. Poor check-in (ratings 0-2) almost guarantees a negative outcome.",
+        "Inflight service": "Much like baggage handling, inflight service only reaches a majority satisfaction level when rated a perfect 5.",
+        "Cleanliness": "Satisfaction follows a clear linear trend—once cleanliness hits a rating of 4 or 5, the majority of passengers shift to being satisfied.",
     }
 
-    focus_features = list(commentary_map.keys())
     selected_feature = st.selectbox(
-        "Choose a feature to inspect", focus_features
+        "Choose a feature",
+        list(commentary_map.keys()),
     )
 
-    distribution_df = two_class_distribution(train_df, selected_feature)
-
-    fig_feature = px.bar(
-        distribution_df,
-        x=selected_feature,
-        y="proportion_pct",
-        color="satisfaction",
-        barmode="group",
-        text="proportion_pct",
-        title=f"Satisfaction Distribution by {selected_feature}",
-    )
-    fig_feature.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
-    fig_feature.update_layout(yaxis_title="Percentage (%)")
-
-    st.plotly_chart(fig_feature, width="stretch")
+    create_bar_chart(train_df, selected_feature, "satisfaction")
 
     with st.expander("📌 Insight"):
         st.write(commentary_map[selected_feature])
 
 
+# =========================
+# 🧠 SUMMARY
+# =========================
 with tab3:
-    st.subheader("Notebook-Aligned EDA Summary")
+    st.subheader("EDA Summary")
 
     st.markdown(
         """
 ### Key Findings
 
-1. Digital touchpoints (online boarding, wifi) are the strongest drivers.
-2. Business passengers are structurally more satisfied than personal travelers.
-3. Comfort and cleanliness must reach rating 4+ to impact satisfaction.
-4. Economy class shows consistent dissatisfaction across most features.
+1. Digital services (online boarding, wifi) are the strongest drivers.
+2. Business travelers are significantly more satisfied.
+3. Comfort and cleanliness must be high to impact satisfaction.
+4. Economy class consistently underperforms.
 """
     )
