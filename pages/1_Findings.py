@@ -1,10 +1,11 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 import streamlit as st
+from plotly.subplots import make_subplots
 
 st.set_page_config(page_title="Findings", page_icon="📊", layout="wide")
+
 
 @st.cache_data
 def load_data(path: str) -> pd.DataFrame:
@@ -33,7 +34,12 @@ def create_pie_chart(df: pd.DataFrame, cat: str):
 
 
 def create_bar_chart(df: pd.DataFrame, cat: str, target: str):
-    dff = df.groupby(cat)[target].value_counts(normalize=True).unstack().reset_index()
+    dff = (
+        df.groupby(cat)[target]
+        .value_counts(normalize=True)
+        .unstack()
+        .reset_index()
+    )
     dff = dff.melt(id_vars=cat, var_name=target, value_name='proportion')
     dff["proportion_pct"] = dff["proportion"] * 100
     fig = px.bar(
@@ -44,7 +50,11 @@ def create_bar_chart(df: pd.DataFrame, cat: str, target: str):
         barmode='group',
         text_auto='.2f',
         title=f'Distribution of {target} by {cat}',
-        labels={cat: cat.capitalize(), 'proportion_pct': 'Proportion (%)', target: target.capitalize()}
+        labels={
+            cat: cat.capitalize(),
+            'proportion_pct': 'Proportion (%)',
+            target: target.capitalize(),
+        },
     )
     fig.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
     st.plotly_chart(fig, use_container_width=True)
@@ -103,26 +113,43 @@ with tab1:
     st.subheader("Univariate Analysis")
 
     # Define all columns
-    num_cols = ["Age", "Flight Distance", "Departure Delay in Minutes", "Arrival Delay in Minutes"]
-    cat_cols = ["Gender", "Customer Type", "Type of Travel", "Class", "Inflight wifi service", 
-                "Departure/Arrival time convenient", "Ease of Online booking", "Gate location", 
-                "Food and drink", "Online boarding", "Seat comfort", "Inflight entertainment", 
-                "On-board service", "Leg room service", "Baggage handling", "Checkin service", 
-                "Inflight service", "Cleanliness", "satisfaction"]
+    num_cols = [
+        "Age",
+        "Flight Distance",
+        "Departure Delay in Minutes",
+        "Arrival Delay in Minutes",
+    ]
+    cat_cols = [
+        "Gender",
+        "Customer Type",
+        "Type of Travel",
+        "Class",
+        "Inflight wifi service",
+        "Departure/Arrival time convenient",
+        "Ease of Online booking",
+        "Gate location",
+        "Food and drink",
+        "Online boarding",
+        "Seat comfort",
+        "Inflight entertainment",
+        "On-board service",
+        "Leg room service",
+        "Baggage handling",
+        "Checkin service",
+        "Inflight service",
+        "Cleanliness",
+        "satisfaction",
+    ]
 
     st.markdown("### Numerical Features")
     selected_num = st.selectbox(
-        "Select a numerical feature",
-        num_cols,
-        key="num_select"
+        "Select a numerical feature", num_cols, key="num_select"
     )
     create_histogram_with_boxplot(train_df, selected_num)
 
     st.markdown("### Categorical Features")
     selected_cat = st.selectbox(
-        "Select a categorical feature",
-        cat_cols,
-        key="cat_select"
+        "Select a categorical feature", cat_cols, key="cat_select"
     )
     create_pie_chart(train_df, selected_cat)
 
@@ -141,8 +168,12 @@ with tab2:
         text="satisfaction_rate",
         title="Satisfaction by Travel Type",
     )
-    fig_travel.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
-    fig_travel.update_layout(showlegend=False, yaxis_title="Satisfaction Rate (%)")
+    fig_travel.update_traces(
+        texttemplate="%{text:.1f}%", textposition="outside"
+    )
+    fig_travel.update_layout(
+        showlegend=False, yaxis_title="Satisfaction Rate (%)"
+    )
     st.plotly_chart(fig_travel, width="stretch")
 
     class_rate = satisfaction_rate(train_df, "Class")
@@ -154,8 +185,12 @@ with tab2:
         text="satisfaction_rate",
         title="Satisfaction by Class",
     )
-    fig_class.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
-    fig_class.update_layout(showlegend=False, yaxis_title="Satisfaction Rate (%)")
+    fig_class.update_traces(
+        texttemplate="%{text:.1f}%", textposition="outside"
+    )
+    fig_class.update_layout(
+        showlegend=False, yaxis_title="Satisfaction Rate (%)"
+    )
     st.plotly_chart(fig_class, width="stretch")
 
     st.markdown("### Numerical vs Numerical")
@@ -215,7 +250,7 @@ with tab2:
 
     create_bar_chart(train_df, selected_feature, "satisfaction")
 
-    with st.expander("📌 Insight"):
+    with st.expander("Insight"):
         st.write(commentary_map[selected_feature])
 
 
@@ -226,9 +261,16 @@ with tab3:
         """
 ### Key Findings
 
-1. Digital services (online boarding, wifi) are the strongest drivers.
-2. Business travelers are significantly more satisfied.
-3. Comfort and cleanliness must be high to impact satisfaction.
-4. Economy class consistently underperforms.
+1. Online boarding and inflight wifi are the dominant predictors, both showing
+threshold effects where satisfaction changes suddenly .
+2. Passenger profile variables (travel type and cabin class) play a
+role, indicating that satisfaction is partially determined by profile
+independent of service quality; for instance Business Class travellers are
+mostly satisfied.
+3. Comfort and cleanliness must be high to get high level of satisfaction.
+4. Operational metrics such as delays contribute with very small effect to
+satisfaction, suggesting passengers can tolerate delays more than poor service
+quality
+
 """
     )

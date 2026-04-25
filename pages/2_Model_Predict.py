@@ -45,12 +45,18 @@ def prepare_input_for_model(input_df: pd.DataFrame, model) -> pd.DataFrame:
 
 
 train_df = load_data("data/train.csv")
-feature_data = train_df.drop(columns=[c for c in [TARGET_COL, "id", "Unnamed: 0"] if c in train_df.columns])
+feature_data = train_df.drop(
+    columns=[
+        c for c in [TARGET_COL, "id", "Unnamed: 0"] if c in train_df.columns
+    ]
+)
 model, label_encoder = load_model_and_encoder()
 
 st.title("🤖 Model Predict")
 st.caption("Create a passenger profile and estimate satisfaction probability")
-st.info(f"Loaded model from {MODEL_PATH} and label encoder from {LABEL_ENCODER_PATH}")
+st.info(
+    f"Loaded model from {MODEL_PATH} and label encoder from {LABEL_ENCODER_PATH}"
+)
 
 with st.form("prediction_form"):
     st.subheader("Passenger Input")
@@ -96,15 +102,23 @@ if submitted:
     prediction = model.predict(model_input_df)[0]
 
     if isinstance(label_encoder, LabelEncoder):
-        decoded_prediction = label_encoder.inverse_transform([int(prediction)])[0]
+        decoded_prediction = label_encoder.inverse_transform(
+            [int(prediction)]
+        )[0]
     else:
         decoded_prediction = str(prediction)
 
     if hasattr(model, "predict_proba"):
         probs = model.predict_proba(model_input_df)[0]
-        classes = list(model.classes_) if hasattr(model, "classes_") else [0, 1]
+        classes = (
+            list(model.classes_) if hasattr(model, "classes_") else [0, 1]
+        )
         satisfied_numeric = int(label_encoder.transform(["satisfied"])[0])
-        satisfied_idx = classes.index(satisfied_numeric) if satisfied_numeric in classes else int(np.argmax(probs))
+        satisfied_idx = (
+            classes.index(satisfied_numeric)
+            if satisfied_numeric in classes
+            else int(np.argmax(probs))
+        )
         prob_satisfied = float(probs[satisfied_idx])
     else:
         prob_satisfied = 1.0 if decoded_prediction == "satisfied" else 0.0
@@ -112,4 +126,6 @@ if submitted:
     st.subheader("Prediction Result")
     st.metric("Predicted Class", decoded_prediction)
     st.progress(prob_satisfied)
-    st.write(f"Estimated probability of satisfaction: **{prob_satisfied * 100:.1f}%**")
+    st.write(
+        f"Estimated probability of satisfaction: **{prob_satisfied * 100:.1f}%**"
+    )

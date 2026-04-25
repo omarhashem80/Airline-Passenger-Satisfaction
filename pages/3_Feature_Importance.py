@@ -39,7 +39,7 @@ norm_df["std"] = norm_df[["RF", "AdaBoost", "LR"]].std(axis=1)
 norm_df = norm_df.sort_values("avg", ascending=False)
 
 
-tab1, tab2, tab3 = st.tabs(["Overview", " Model Comparison", "🧠 Insights"])
+tab1, tab2, tab3 = st.tabs(["Overview", " Model Comparison", "Insights"])
 
 
 with tab1:
@@ -119,35 +119,36 @@ with tab3:
         & (norm_df["std"] > 0.05)
     ]["feature"].tolist()
 
-    st.markdown("### 🔍 Key Findings")
+    st.markdown("###  Key Findings")
 
     st.markdown(
         f"""
-- 🔝 **Top drivers overall**: {', '.join(top5) if top5 else 'N/A'}
-- 🌳 **Random Forest focuses on**: **{top_rf}**
-- ⚡ **AdaBoost focuses on**: **{top_ab}**
-- 📈 **Logistic Regression focuses on**: **{top_lr}**
+-  **Top drivers overall**: {', '.join(top5) if top5 else 'N/A'}
+-  **Random Forest focuses on**: **{top_rf}**
+-  **AdaBoost focuses on**: **{top_ab}**
+-  **Logistic Regression focuses on**: **{top_lr}**
     """
     )
 
-    st.markdown("### 🤝 Model Agreement")
+    st.markdown("### Model Agreement")
     st.success(", ".join(consistent) if consistent else "No clear agreement")
 
-    st.markdown("### ⚠️ Model Disagreement")
+    st.markdown("### Model Disagreement")
     st.warning(
         ", ".join(disagreement) if disagreement else "No strong disagreement"
     )
 
     if dominant:
-        st.markdown("### 🔥 Model-Sensitive Features")
+        st.markdown("### Model-Sensitive Features")
         st.error(", ".join(dominant))
 
     st.markdown(
         """
-### 💡 Interpretation
+### Interpretation
 
 - Tree-based models (RF, AdaBoost) capture nonlinear relationships.
-- Logistic Regression emphasizes linear structural effects.
-- Consistently high features → strong business drivers.
+- Logistic Regression primarily models linear relationships.
+- Features that consistently rank highly in importance indicate strong effect
+on target feature
 """
     )
