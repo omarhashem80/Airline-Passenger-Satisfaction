@@ -85,6 +85,18 @@ Instead of using many models superficially, this project focuses on **three mode
 
 ---
 
+## 🚀 Live Demo
+
+👉 https://airline-passenger-satisfaction-app.streamlit.app/
+
+Explore the full interactive dashboard:
+- EDA insights  
+- Feature importance comparison  
+- Passenger-level predictions  
+- Business conclusions  
+
+---
+
 ## 📌 Interactive Dashboard (Streamlit)
 
 Run the app:
