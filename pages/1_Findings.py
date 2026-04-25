@@ -112,7 +112,6 @@ tab1, tab2, tab3 = st.tabs(["📊 Univariate", "🔗 Bivariate", "🧠 Summary"]
 with tab1:
     st.subheader("Univariate Analysis")
 
-    # Define all columns
     num_cols = [
         "Age",
         "Flight Distance",
@@ -159,7 +158,6 @@ with tab2:
 
     st.markdown("### Categorical vs Numerical")
 
-    # Mean age by satisfaction
     age_df = train_df.groupby("satisfaction")[["Age"]].mean().reset_index()
 
     fig_age = px.bar(
