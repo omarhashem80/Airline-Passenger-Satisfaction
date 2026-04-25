@@ -53,7 +53,6 @@ tab1, tab2, tab3 = st.tabs(["📊 Univariate", "🔗 Bivariate", "🧠 Summary"]
 with tab1:
     st.subheader("Univariate Analysis")
 
-    # --- Travel Type ---
     travel_rate = satisfaction_rate(train_df, "Type of Travel")
     fig_travel = px.bar(
         travel_rate,
@@ -72,7 +71,6 @@ with tab1:
             "Business travelers are significantly more satisfied, while personal travelers show strong dissatisfaction trends."
         )
 
-    # --- Class ---
     class_rate = satisfaction_rate(train_df, "Class")
     fig_class = px.bar(
         class_rate,
@@ -91,7 +89,6 @@ with tab1:
             "Business class dominates satisfaction, while economy classes consistently underperform."
         )
 
-    # --- Age Distribution ---
     fig_age_dist = px.histogram(
         train_df,
         x="Age",
@@ -105,7 +102,6 @@ with tab1:
 with tab2:
     st.subheader("Bivariate Analysis Highlights")
 
-    # --- Numerical vs Numerical ---
     st.markdown("### Numerical vs Numerical")
 
     num_cols = [
@@ -132,7 +128,6 @@ with tab2:
     )
     st.plotly_chart(fig_delay_scatter, width="stretch")
 
-    # --- Categorical vs Numerical ---
     st.markdown("### Categorical vs Numerical")
 
     age_by_sat = train_df.groupby("satisfaction", as_index=False)["Age"].mean()
@@ -152,7 +147,6 @@ with tab2:
             "Older passengers tend to report higher satisfaction, while younger passengers are more critical."
         )
 
-    # --- Categorical vs Categorical ---
     st.markdown("### Categorical vs Categorical")
 
     commentary_map = {

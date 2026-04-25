@@ -45,5 +45,5 @@ st.subheader("Quick Dataset Snapshot")
 st.dataframe(train_df.head(10), width="stretch")
 
 st.info(
-    "Use the sidebar to switch pages. The app is designed for both project demo and decision support."
+    "Use the sidebar to switch pages and dive deeper into the analysis, model predictions, and feature importance insights"
 )

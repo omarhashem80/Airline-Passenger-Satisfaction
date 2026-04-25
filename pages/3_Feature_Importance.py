@@ -29,7 +29,6 @@ for col in ["RF", "AdaBoost", "LR"]:
     col_sum = norm_df[col].sum()
     norm_df[col] = norm_df[col] / col_sum if col_sum != 0 else 0
 
-# Average + variability
 norm_df["avg"] = norm_df[["RF", "AdaBoost", "LR"]].mean(axis=1)
 norm_df["std"] = norm_df[["RF", "AdaBoost", "LR"]].std(axis=1)
 
