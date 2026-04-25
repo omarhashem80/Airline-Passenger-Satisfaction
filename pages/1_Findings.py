@@ -81,7 +81,7 @@ def categorical_distribution(df: pd.DataFrame, col: str) -> pd.DataFrame:
 
 
 st.title("📊 Findings")
-st.caption("Interactive EDA dashboard based on notebook analysis")
+st.caption("Interactive EDA dashboard")
 
 k1, k2, k3 = st.columns(3)
 with k1:
@@ -129,34 +129,47 @@ with tab1:
 
 with tab2:
     st.subheader("Bivariate Analysis")
+    
+    st.markdown("### Categorical vs Numerical")
 
-    st.markdown("### Categorical vs Satisfaction")
+    # Mean age by satisfaction
+    age_df = train_df.groupby("satisfaction")[["Age"]].mean().reset_index()
 
-    travel_rate = satisfaction_rate(train_df, "Type of Travel")
-    fig_travel = px.bar(
-        travel_rate,
-        x="Type of Travel",
-        y="satisfaction_rate",
-        color="Type of Travel",
-        text="satisfaction_rate",
-        title="Satisfaction by Travel Type",
+    fig_age = px.bar(
+        age_df,
+        x="satisfaction",
+        y="Age",
+        title="Mean Age by Satisfaction",
+        labels={"satisfaction": "Satisfaction", "Age": "Mean Age"},
+        text_auto=".2f",
     )
-    fig_travel.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
-    fig_travel.update_layout(showlegend=False, yaxis_title="Satisfaction Rate (%)")
-    st.plotly_chart(fig_travel, width="stretch")
 
-    class_rate = satisfaction_rate(train_df, "Class")
-    fig_class = px.bar(
-        class_rate,
-        x="Class",
-        y="satisfaction_rate",
-        color="Class",
-        text="satisfaction_rate",
-        title="Satisfaction by Class",
-    )
-    fig_class.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
-    fig_class.update_layout(showlegend=False, yaxis_title="Satisfaction Rate (%)")
-    st.plotly_chart(fig_class, width="stretch")
+    fig_age.update_layout(xaxis={"categoryorder": "total ascending"})
+    st.plotly_chart(fig_age, width="stretch")
+
+
+    with st.expander("📌 Insight"):
+        st.write(
+        "Younger passengers tend to be more critical or have higher expectations, "
+        "while older demographics generally report higher satisfaction levels."
+        )
+
+    def plot_satisfaction_bar(df, feature, title):
+        data = satisfaction_rate(df, feature)
+
+        fig = px.bar(
+            data,
+            x=feature,
+            y="satisfaction_rate",
+            color=feature,
+            text="satisfaction_rate",
+            title=title,
+        )
+
+        fig.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
+        fig.update_layout(showlegend=False, yaxis_title="Satisfaction Rate (%)")
+
+        st.plotly_chart(fig, width="stretch")
 
     st.markdown("### Numerical vs Numerical")
 
@@ -185,7 +198,8 @@ with tab2:
     )
     st.plotly_chart(fig_delay, width="stretch")
 
-    st.markdown("### Feature vs Satisfaction Distribution")
+
+    st.markdown("### Categorical vs Satisfaction Distribution")
 
     commentary_map = {
         "Gender": "Low impact on satisfaction.",
