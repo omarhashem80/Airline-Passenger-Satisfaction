@@ -23,7 +23,7 @@ st.markdown(
 | **Random Forest**   | **94%**      | **0.96**               | **0.94**   | 1%             | None        |
 | AdaBoost            | 91%          | 0.95                   | 0.91       | 0%             | None        |
 | Logistic Regression | 87%          | 0.91                   | 0.87       | 1%             | None        |
-| Baseline (ZeroR)    | 57%          | —                      | —          | —              | —           |
+| Baseline (ZeroR)    | 56%          |  1.00                      | 0.72         | Not Applicable             | Not Applicable           |
 """
 )
 
@@ -46,7 +46,7 @@ ceiling.
 """
 )
 
-st.header("Feature Signal")
+st.header("Features Signal")
 
 st.markdown(
     """
@@ -84,26 +84,35 @@ baseline = 0.57
 
 st.markdown(
     f"""
-The best results were achieved by **{best_model}**, with accuracy=
+1. The best results were achieved by **{best_model}**, with accuracy=
 {acc:.2f}, recall={recall:.4f}, and F1={f1:.2f}.
 AdaBoost performed slightly lower (accuracy={ada_acc:.2f}), while Logistic
 Regression went behind (accuracy={lr_acc:.2f}).
 All models greatly outperform the baseline model (accuracy={baseline:.2f}),
 confirming that the data has useful patterns beyond class imbalance.
 
-This points to the ensemble model capturing most of the useful structure in
+2. This points to the ensemble model capturing most of the useful structure in
 the data, likely because it can model non-linear relationships between service
 quality, passenger profile, and travel context.
 Linear models fail to represent these relationships, while boosting
 improves performance but remains limited.
 
-The results indicate that **digital service touchpoints and
-passenger segmentation carry the majority of feature importance **, while
-operational factors such as delays contribute very little.
-Improving satisfaction therefore depends more on optimizing user
-experiences (boarding, wifi) than on traditional operational metrics.
+3. The business should prioritize online boarding and inflight Wi-Fi, since
+these are among the strongest drivers of satisfaction.
+4. Travel class and type of travel should be treated as major customer
+segments, because business travelers and business-class passengers are much
+more satisfied than economy and personal travelers.
+5. Seat comfort, leg room, inflight entertainment, and cleanliness should be
+improved together, as they strongly shape the passenger experience.
+6. Poor service ratings on these experience-related features lead to much
+higher dissatisfaction, so fixing them will have more impact on satisfaction
+level.
 
-The reported metrics provide an overall picture, but a deep look
+7. The airline should pay special attention to economy and personal-travel
+passengers, since they show the lowest satisfaction and represent the biggest
+improvement opportunity.
+
+8. The reported metrics provide an overall picture, but a deep look
 at misclassified cases are still needed to evaluate edge scenarios such
 as mixed passenger profiles or medium service ratings which evaluation
 scores like F1 do not capture.
