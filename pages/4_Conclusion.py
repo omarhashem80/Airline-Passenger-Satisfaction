@@ -21,8 +21,8 @@ st.markdown(
 | Model                | Test Accuracy | Recall (dissatisfied) | F1 (macro) | Train–Test Gap | Overfitting |
 |---------------------|--------------|------------------------|------------|----------------|-------------|
 | **Random Forest**   | **94%**      | **0.96**               | **0.94**   | 1%             | None        |
-| AdaBoost            | 91%          | 0.95                   | 0.91       | 0%             | None        |
-| Logistic Regression | 87%          | 0.91                   | 0.87       | 1%             | None        |
+| AdaBoost            | 91%          | 0.93                   | 0.91       | 0%             | None        |
+| Logistic Regression | 89%          | 0.90                   | 0.89       | 1%             | None        |
 | Baseline (ZeroR)    | 56%          |  1.00                      | 0.72         | Not Applicable             | Not Applicable           |
 """
 )
@@ -73,7 +73,7 @@ acc = 0.94
 recall = 0.9592
 f1 = 0.94
 ada_acc = 0.91
-lr_acc = 0.87
+lr_acc = 0.89
 baseline = 0.57
 
 st.markdown(

@@ -8,7 +8,13 @@ st.set_page_config(page_title="Model Predict", page_icon="🤖", layout="wide")
 MODEL_PATH = "models/best_model.pkl"
 LABEL_ENCODER_PATH = "models/label_encoder.pkl"
 CONFIG_PATH = "models/config.pkl"
-
+ordinal_cols = [
+    'inflight_wifi_service', 'departure/arrival_time_convenient',
+    'ease_of_online_booking', 'gate_location', 'food_and_drink',
+    'online_boarding', 'seat_comfort', 'inflight_entertainment',
+    'on-board_service', 'leg_room_service', 'baggage_handling',
+    'checkin_service', 'inflight_service', 'cleanliness'
+]
 
 @st.cache_resource
 def load_artifacts():
@@ -34,6 +40,7 @@ def prepare_input(input_df: pd.DataFrame, model):
             if col not in df.columns:
                 df[col] = 0
         df = df[expected]
+    df[ordinal_cols] = df[ordinal_cols].replace(0, np.nan)
 
     return df
 
