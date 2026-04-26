@@ -7,7 +7,6 @@ st.set_page_config(
     layout="wide",
 )
 
-
 @st.cache_data
 def load_data(path: str) -> pd.DataFrame:
     return pd.read_csv(path)

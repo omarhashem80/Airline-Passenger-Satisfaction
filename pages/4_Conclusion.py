@@ -27,12 +27,6 @@ st.markdown(
 """
 )
 
-st.info(
-    "Recall on the dissatisfied class was the main objective, "
-    "ensuring that unhappy passengers are not misclassified. "
-)
-
-
 st.header("Key Insights")
 
 st.markdown(
